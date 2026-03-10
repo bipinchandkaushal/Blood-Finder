@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ - Blood Finder</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f8f9fa;
+    margin: 0;
+    padding: 20px;
+}
+h1 {
+    color: #d9534f;
+    text-align: center;
+    margin-bottom: 30px;
+}
+.faq-container {
+    max-width: 900px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+.faq-item {
+    border-bottom: 1px solid #ddd;
+    padding: 15px 0;
+}
+.faq-item:last-child {
+    border-bottom: none;
+}
+.faq-question {
+    font-weight: bold;
+    color: #d9534f;
+    cursor: pointer;
+    position: relative;
+    padding-right: 20px;
+}
+.faq-question::after {
+    content: '+';
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-weight: bold;
+}
+.faq-question.active::after {
+    content: '-';
+}
+.faq-answer {
+    display: none;
+    margin-top: 10px;
+    color: #333;
+    line-height: 1.5;
+}
+</style>
+</head>
+<body>
+
+<h1>Frequently Asked Questions</h1>
+
+<div class="faq-container">
+    <div class="faq-item">
+        <div class="faq-question">Need Blood Immediately. Which app finds patients blood requirement as soon as possible?</div>
+        <div class="faq-answer">At Google Play Store, you can search Blood Finder. Once installed, using GPS technology the app locates the nearest blood bank along with blood availability.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">I had alcohol before going to donate blood. Is it okay?</div>
+        <div class="faq-answer">No. We do not take blood from anyone under the influence of alcohol. Being intoxicated can affect your ability to understand and answer the donor questionnaire and declaration.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">I am taking antibiotics. Can I donate blood?</div>
+        <div class="faq-answer">It depends on why you are taking the antibiotics and may also depend on doctor's advice.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Are there any side effects of blood donation?</div>
+        <div class="faq-answer">There are no significant side effects. Blood bank staff ensures that your donation experience is safe and comfortable. Some donors have donated 25-100 times in their lifetime.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">How often can I donate blood?</div>
+        <div class="faq-answer">You can donate blood after every three to four months.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">What should I eat before blood donation?</div>
+        <div class="faq-answer">Eat your usual home meals. A light snack and a soft drink before donation are sufficient.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Where can I find latest blood stock from various blood banks?</div>
+        <div class="faq-answer">You can check blood stock in the Stock Availability page of the app.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Where can I find details of camps being conducted by various blood banks?</div>
+        <div class="faq-answer">Camp details are available in the Camp Schedule page. Many camps also allow online pre-registration.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">How can I onboard my blood bank to Blood Finder?</div>
+        <div class="faq-answer">You can register your blood bank using the Add Blood Center form available in the app.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Whom should I contact in case of any problem?</div>
+        <div class="faq-answer">Kindly email your queries to support@bloodfinder.com.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">How to check platelet units in the app?</div>
+        <div class="faq-answer">Search for stock in the Stock Availability page, select "Platelet" as component type, and search again.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">How can I check the nearest blood bank from my location?</div>
+        <div class="faq-answer">Enable location in the app and search for the nearest blood bank. You will see a list sorted by distance.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">How to verify if blood unit is available on the current date?</div>
+        <div class="faq-answer">Check the "Last Updated" or "LIVE" status in the Blood Availability option.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">How does age affect my ability to donate blood?</div>
+        <div class="faq-answer">Minimum age for whole blood donation is 18 years. Maximum age depends on donation type.</div>
+    </div>
+
+    <div class="faq-item">
+        <div class="faq-question">Eligibility questions before donating blood</div>
+        <div class="faq-answer">
+            <ul>
+                <li>Are you currently taking any medication (e.g., antibiotics, blood thinners)? No</li>
+                <li>Are you between 18 to 65 years of age? Yes</li>
+                <li>Is your body weight at least 45 kg? Yes</li>
+                <li>Have you had any infection, fever, cold, cough, weakness, dizziness, or fatigue today? No</li>
+                <li>Have you undergone any surgery or major dental procedure recently (last 6–12 months)? No</li>
+                <li>Did you have at least 6 hours of sleep last night? Yes</li>
+                <li>Did you eat a light (non-oily) meal 2–3 hours before donating? Yes</li>
+                <li>Have you had any tattoos, piercings, or acupuncture in the last 6 months? No</li>
+                <li>Have you consumed alcohol in the last 24 hours? No</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+// FAQ toggle
+const questions = document.querySelectorAll('.faq-question');
+questions.forEach(q => {
+    q.addEventListener('click', () => {
+        q.classList.toggle('active');
+        const answer = q.nextElementSibling;
+        if(answer.style.display === 'block') {
+            answer.style.display = 'none';
+        } else {
+            answer.style.display = 'block';
+        }
+    });
+});
+</script>
+
+</body>
+</html>

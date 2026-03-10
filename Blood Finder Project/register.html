@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blood Finder Register</title>
+<style>
+  /* Reset default styles */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+    padding: 20px;
+  }
+
+  /* Form container */
+  .register-container {
+    background-color: #fff;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+    width: 380px;
+    max-width: 100%;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .register-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 35px rgba(0,0,0,0.25);
+  }
+
+  .register-container h2 {
+    margin-bottom: 25px;
+    color: #d9534f;
+  }
+
+  /* Input fields */
+  .register-container input {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .register-container input:hover,
+  .register-container input:focus {
+    border-color: #d9534f;
+    box-shadow: 0 0 8px rgba(217,83,79,0.4);
+  }
+
+  /* Button */
+  .register-container button {
+    width: 100%;
+    padding: 12px;
+    background-color: #d9534f;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+    margin-top: 15px;
+  }
+
+  .register-container button:hover {
+    background-color: #c43e46;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(196,62,70,0.4);
+  }
+
+  /* Link */
+  .register-container .login-link {
+    display: block;
+    margin-top: 15px;
+    color: #d9534f;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .register-container .login-link:hover {
+    text-decoration: underline;
+    color: #a73339;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    .register-container {
+      padding: 30px 20px;
+    }
+
+    .register-container h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .register-container input,
+    .register-container button {
+      padding: 10px;
+      font-size: 14px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="register-container">
+  <h2>Create Account</h2>
+  <form action="#" method="POST">
+    <input type="text" class="fullname" name="fullname" placeholder="Full Name" required>
+    <input type="email" class="email" name="email" placeholder="Email" required>
+    <input type="password" class="password" name="password" placeholder="Create Password" required>
+    <!-- <input type="text" name="aadhar" placeholder="Aadhaar Card Number" required> -->
+    <input type="tel" class="mob" name="mobile" placeholder="Mobile Number" required>
+    <button type="submit" class="submit">Register</button>
+    <a href="login.html" class="login-link">Already have an account? Sign In</a>
+  </form>
+</div>
+
+</body>
+<script src="reg.js"></script>
+</html>

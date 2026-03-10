@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blood Finder - Settings</title>
+<style>
+body { font-family: Arial, sans-serif; background:#f8f9fa; margin:0; padding:0; transition: background 0.3s, color 0.3s; }
+body.dark { background:#2b2b2b; color:#f1f1f1; }
+header { background:#d9534f; color:white; padding:15px; font-size:22px; display:flex; justify-content:center; }
+.container { width:90%; max-width:650px; margin:30px auto; background:white; padding:25px; border-radius:15px; box-shadow:0 5px 15px rgba(0,0,0,0.15); transition: background 0.3s, color 0.3s; }
+body.dark .container { background:#3a3a3a; color:#f1f1f1; }
+h2 { color:#d9534f; margin-bottom:20px; }
+label { display:flex; align-items:center; gap:10px; margin:12px 0; font-weight:bold; }
+input[type="checkbox"], input[type="password"] { width:auto; }
+input[type="password"] { flex:1; padding:8px; border-radius:6px; border:1px solid #ccc; margin-left:10px; }
+button { margin-top:20px; padding:12px; background:#d9534f; color:white; border:none; border-radius:8px; cursor:pointer; font-size:16px; }
+button:hover { background:#c9302c; }
+.password-section { margin-top:25px; }
+</style>
+</head>
+<body>
+
+<header>🩸 Blood Finder - Settings</header>
+
+<div class="container">
+  <h2>⚙️ Website Settings</h2>
+
+  <!-- General Settings -->
+  <label><input type="checkbox" id="enableNotifications"> Enable Notifications</label>
+  <label><input type="checkbox" id="enableDarkMode"> Enable Dark Mode</label>
+  <label><input type="checkbox" id="autoRefresh"> Auto Refresh Blood Availability</label>
+
+  <!-- Password Change -->
+  <div class="password-section">
+    <h3>🔑 Change Admin Password</h3>
+    <label>Current Password: <input type="password" id="currentPassword"></label>
+    <label>New Password: <input type="password" id="newPassword"></label>
+    <label>Confirm New Password: <input type="password" id="confirmPassword"></label>
+  </div>
+
+  <button onclick="saveSettings()">💾 Save Settings</button>
+</div>
+
+<script>
+// Default website settings
+let settings = {
+  enableNotifications: true,
+  enableDarkMode: false,
+  autoRefresh: true,
+  adminPassword: "admin123"
+};
+
+// Pre-fill toggles
+document.getElementById("enableNotifications").checked = settings.enableNotifications;
+document.getElementById("enableDarkMode").checked = settings.enableDarkMode;
+document.getElementById("autoRefresh").checked = settings.autoRefresh;
+applyDarkMode();
+
+// Apply dark mode immediately
+document.getElementById("enableDarkMode").addEventListener("change", applyDarkMode);
+
+function applyDarkMode() {
+  document.body.classList.toggle("dark", document.getElementById("enableDarkMode").checked);
+}
+
+function saveSettings() {
+  // Save general settings
+  settings.enableNotifications = document.getElementById("enableNotifications").checked;
+  settings.enableDarkMode = document.getElementById("enableDarkMode").checked;
+  settings.autoRefresh = document.getElementById("autoRefresh").checked;
+
+  // Handle password change
+  let currentPass = document.getElementById("currentPassword").value;
+  let newPass = document.getElementById("newPassword").value;
+  let confirmPass = document.getElementById("confirmPassword").value;
+
+  if(currentPass || newPass || confirmPass){
+    if(currentPass !== settings.adminPassword){
+      alert("❌ Current password is incorrect!");
+      return;
+    }
+    if(newPass !== confirmPass){
+      alert("❌ New passwords do not match!");
+      return;
+    }
+    settings.adminPassword = newPass;
+  }
+
+  // Clear password fields
+  document.getElementById("currentPassword").value = "";
+  document.getElementById("newPassword").value = "";
+  document.getElementById("confirmPassword").value = "";
+
+  alert("✅ Settings saved successfully!\n\n" +
+        "Notifications: " + (settings.enableNotifications ? "ON" : "OFF") + "\n" +
+        "Dark Mode: " + (settings.enableDarkMode ? "ON" : "OFF") + "\n" +
+        "Auto Refresh: " + (settings.autoRefresh ? "ON" : "OFF"));
+}
+</script>
+
+</body>
+</html>

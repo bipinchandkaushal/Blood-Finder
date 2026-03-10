@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Emergency Blood Delivery - Blood Finder</title>
+<style>
+  :root {
+    --brand: #d9534f;
+    --muted: #6b6b6b;
+    --card: #fff;
+    --bg: #f8f9fa;
+  }
+  body { font-family: Arial, sans-serif; background:var(--bg); margin:0; padding:24px; color:#222; }
+  .container { max-width:980px; margin:0 auto; }
+  h1 { color:var(--brand); margin-bottom:8px; }
+  .lead { color:var(--muted); margin-bottom:18px; }
+
+  .card { background:var(--card); padding:18px; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,0.06); margin-bottom:18px; }
+  .grid { display:flex; gap:12px; flex-wrap:wrap; }
+  .col { flex:1 1 300px; min-width:240px; }
+  label { display:block; font-weight:600; margin-bottom:6px; color:#333; }
+  input[type="text"], input[type="tel"], input[type="email"], input[type="number"], select, textarea, input[type="file"] {
+    width:100%; padding:10px; border:1px solid #dcdcdc; border-radius:6px; box-sizing:border-box;
+  }
+  textarea { min-height:90px; resize:vertical; }
+
+  .row { display:flex; gap:10px; }
+  .small { flex:0 0 140px; }
+  .muted { color:var(--muted); font-size:0.9rem; }
+
+  .btn { background:var(--brand); color:#fff; padding:10px 14px; border:none; border-radius:6px; cursor:pointer; font-weight:600; }
+  .btn.secondary { background:#444; }
+  .hint { font-size:0.9rem; color:var(--muted); margin-top:6px; }
+
+  .notice { background:#fff3f3; border:1px solid #ffd6d6; color:#7a1f1f; padding:10px; border-radius:6px; margin-bottom:12px; }
+  .file-preview { margin-top:8px; font-size:0.9rem; color:#333; }
+
+  .payment-methods { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  .pm { padding:8px 10px; border:1px solid #ddd; border-radius:6px; cursor:pointer; }
+  .pm.active { border-color:var(--brand); box-shadow:0 2px 8px rgba(217,83,79,0.08); }
+
+  .required { color:var(--brand); margin-left:6px; font-weight:700; }
+  .disabled { opacity:0.6; pointer-events:none; }
+  .success { color: #156f3e; font-weight:700; }
+
+  footer { text-align:center; color:var(--muted); margin-top:18px; font-size:0.9rem; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Emergency Blood Delivery</h1>
+    <div class="lead">If this is a true medical emergency and a hospital has approved home/ambulance delivery, fill the form below. Proof from a registered hospital/doctor is required to reduce misuse.</div>
+
+    <div class="card notice">
+      <strong>Important:</strong> Emergency delivery is <strong>not</strong> guaranteed. Requests without valid proof will be rejected. Payment is required for delivery fees. This page is a demo — integrate server-side verification and a payment gateway before using live.
+    </div>
+
+    <form id="emergencyForm" class="card" enctype="multipart/form-data" autocomplete="off">
+      <!-- Requester & patient -->
+      <div class="grid">
+        <div class="col">
+          <label>Requester Name <span class="required">*</span></label>
+          <input id="reqName" type="text" placeholder="Your name (requester)" required>
+        </div>
+
+        <div class="col">
+          <label>Requester Mobile <span class="required">*</span></label>
+          <input id="reqMobile" type="tel" placeholder="10-digit mobile" pattern="[0-9]{10}" required>
+          <div class="hint">We will send an OTP for verification</div>
+        </div>
+
+        <div class="col">
+          <label>Requester Email</label>
+          <input id="reqEmail" type="email" placeholder="optional email">
+        </div>
+      </div>
+
+      <hr style="margin:14px 0">
+
+      <div class="grid">
+        <div class="col">
+          <label>Patient Name <span class="required">*</span></label>
+          <input id="patientName" type="text" placeholder="Patient's full name" required>
+        </div>
+
+        <div class="col">
+          <label>Blood Group <span class="required">*</span></label>
+          <select id="bloodGroup" required>
+            <option value="">Select</option>
+            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+          </select>
+        </div>
+
+        <div class="col">
+          <label>Units Needed <span class="required">*</span></label>
+          <input id="units" type="number" min="1" value="1" required>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="grid">
+        <div class="col">
+          <label>Pickup / Delivery Address <span class="required">*</span></label>
+          <textarea id="address" placeholder="Hospital or delivery address with full details" required></textarea>
+        </div>
+
+        <div class="col">
+          <label>Nearest Hospital (optional)</label>
+          <input id="hospital" type="text" placeholder="Hospital name">
+        </div>
+      </div>
+
+      <hr style="margin:14px 0">
+
+      <!-- Proof upload -->
+      <div>
+        <label>Proof (Doctor/hospital prescription or hospital ID) <span class="required">*</span></label>
+        <input id="proofFile" type="file" accept=".pdf,image/*" required>
+        <div class="hint">Upload a scanned prescription or hospital letter. Max 5MB. JPG/PNG/PDF supported.</div>
+        <div id="preview" class="file-preview"></div>
+      </div>
+
+      <hr style="margin:14px 0">
+
+      <!-- Verification -->
+      <div class="grid">
+        <div class="col">
+          <label>Verify Mobile (OTP)</label>
+          <div class="row">
+            <input id="otpMobile" type="tel" placeholder="mobile to verify" pattern="[0-9]{10}" class="small">
+            <button type="button" id="sendOtp" class="btn">Send OTP</button>
+            <div style="flex:1"></div>
+          </div>
+
+          <div style="margin-top:8px" id="otpArea" class="muted" hidden>
+            <input id="otpInput" placeholder="Enter OTP" style="width:140px;padding:8px;border:1px solid #ddd;border-radius:6px;">
+            <button type="button" id="verifyOtp" class="btn secondary">Verify</button>
+            <span id="otpStatus" class="muted" style="margin-left:10px"></span>
+          </div>
+        </div>
+
+        <div class="col">
+          <label>Emergency Reason (short)</label>
+          <textarea id="reason" placeholder="Short reason why emergency delivery is required (one or two lines)"></textarea>
+          <div class="hint">This helps the team triage requests quickly.</div>
+        </div>
+
+        <div class="col">
+          <label>Preferred Delivery Mode</label>
+          <select id="deliveryMode">
+            <option value="ambulance">Ambulance delivery (recommended)</option>
+            <option value="pickup">Self pickup from nearest blood bank</option>
+          </select>
+        </div>
+      </div>
+
+      <hr style="margin:14px 0">
+
+      <!-- Payment -->
+      <div>
+        <label>Delivery Fee (example)</label>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
+          <div style="font-size:1.2rem;font-weight:700">₹ <span id="fee">500</span></div>
+          <div class="muted">Standard urgent delivery charge (example). Real price should come from server calculation.</div>
+        </div>
+
+        <div style="margin-top:10px" class="payment-methods">
+          <div class="pm active" data-method="upi">UPI</div>
+          <div class="pm" data-method="netbank">Net Banking</div>
+          <div class="pm" data-method="cod">Pay on Delivery (only hospital-approved)</div>
+        </div>
+
+        <div id="paymentDetails" style="margin-top:12px;">
+          <!-- UPI details -->
+          <div id="upiBox">
+            <label>UPI ID (payer)</label>
+            <input id="upiId" type="text" placeholder="example@bank">
+            <div class="hint">On submit we will initiate a UPI payment request (demo). Integrate a real PG for production.</div>
+          </div>
+
+          <!-- Netbanking -->
+          <div id="netbankBox" style="display:none">
+            <label>Netbanking Reference (simulated)</label>
+            <input id="netRef" type="text" placeholder="Bank txn/reference">
+            <div class="hint">You will be redirected to a payment gateway in a real system.</div>
+          </div>
+
+          <!-- COD -->
+          <div id="codBox" style="display:none">
+            <div class="hint">COD allowed only if hospital confirms emergency and approves ambulance partner.</div>
+          </div>
+        </div>
+      </div>
+
+      <hr style="margin:14px 0">
+
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button id="submitBtn" class="btn" type="submit" disabled>Request Emergency Delivery</button>
+        <div id="formStatus" class="muted">Mobile verification and proof required.</div>
+      </div>
+
+      <div class="hint" style="margin-top:10px">
+        By submitting you confirm that the information and proof are true. Misuse will lead to account suspension and legal action.
+      </div>
+    </form>
+
+    <footer>Blood Finder — emergency delivery demo. Backend & payment integration required for production.</footer>
+  </div>
+
+<script>
+/*
+  Client-side demo logic:
+  - Enforces proof file presence and mobile OTP verification before enabling submit.
+  - File size/extension checks.
+  - Payment selection toggle (UI only).
+  NOTE: This is a front-end demo. Replace the OTP, file upload, and payment flow with secure server-side implementations before going live.
+*/
+
+const proofFile = document.getElementById('proofFile');
+const preview = document.getElementById('preview');
+const sendOtp = document.getElementById('sendOtp');
+const otpArea = document.getElementById('otpArea');
+const otpInput = document.getElementById('otpInput');
+const verifyOtp = document.getElementById('verifyOtp');
+const otpStatus = document.getElementById('otpStatus');
+const submitBtn = document.getElementById('submitBtn');
+const formStatus = document.getElementById('formStatus');
+let otpSent = null;
+let otpVerified = false;
+let proofValid = false;
+
+// Allowed file types and size limit (5MB)
+const MAX_SIZE = 5 * 1024 * 1024;
+const ALLOWED_TYPES = ['application/pdf','image/png','image/jpeg','image/jpg'];
+
+// Preview and validate proof file
+proofFile.addEventListener('change', (e) => {
+  preview.innerHTML = '';
+  const file = e.target.files[0];
+  if(!file) { proofValid = false; updateSubmitState(); return; }
+
+  if(file.size > MAX_SIZE) {
+    preview.innerHTML = '<span style="color:#b02a2a">File too large (max 5MB).</span>';
+    proofValid = false; updateSubmitState(); return;
+  }
+  if(!ALLOWED_TYPES.includes(file.type)) {
+    preview.innerHTML = '<span style="color:#b02a2a">Unsupported file type. Use PDF/JPG/PNG.</span>';
+    proofValid = false; updateSubmitState(); return;
+  }
+
+  proofValid = true;
+  // show preview (image) or filename (pdf)
+  if(file.type.startsWith('image/')) {
+    const img = document.createElement('img');
+    img.style.maxWidth = '220px';
+    img.style.borderRadius = '6px';
+    img.style.marginTop = '8px';
+    const reader = new FileReader();
+    reader.onload = () => { img.src = reader.result; preview.appendChild(img); };
+    reader.readAsDataURL(file);
+  } else {
+    preview.innerHTML = `<div>Uploaded: <strong>${file.name}</strong></div>`;
+  }
+  updateSubmitState();
+});
+
+// Simulated OTP send (demo only)
+sendOtp.addEventListener('click', () => {
+  const mobile = document.getElementById('otpMobile').value || document.getElementById('reqMobile').value;
+  if(!/^\d{10}$/.test(mobile)) {
+    alert('Enter a valid 10-digit mobile to receive OTP.');
+    return;
+  }
+  // In production: request backend to send OTP via SMS provider (Twilio, MSG91, etc.)
+  otpSent = String(Math.floor(100000 + Math.random()*900000)); // demo OTP
+  console.log('Demo OTP (replace with real SMS):', otpSent);
+  otpArea.hidden = false;
+  otpStatus.textContent = 'OTP sent (demo). Check console.';
+  otpVerified = false;
+  updateSubmitState();
+});
+
+// Simulate OTP verify
+verifyOtp.addEventListener('click', () => {
+  if(!otpSent) { alert('No OTP was sent.'); return; }
+  if(otpInput.value === otpSent) {
+    otpVerified = true;
+    otpStatus.textContent = 'Verified ✓';
+    otpStatus.classList.add('success');
+  } else {
+    otpVerified = false;
+    otpStatus.textContent = 'Incorrect OTP';
+    otpStatus.classList.remove('success');
+  }
+  updateSubmitState();
+});
+
+// Payment method toggle (UI only)
+document.querySelectorAll('.pm').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.pm').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    const method = el.dataset.method;
+    document.getElementById('upiBox').style.display = method === 'upi' ? '' : 'none';
+    document.getElementById('netbankBox').style.display = method === 'netbank' ? '' : 'none';
+    document.getElementById('codBox').style.display = method === 'cod' ? '' : 'none';
+  });
+});
+
+// Enable Submit only when proof uploaded and OTP verified
+function updateSubmitState() {
+  if(proofValid && otpVerified) {
+    submitBtn.disabled = false;
+    formStatus.textContent = 'Ready to submit';
+    formStatus.classList.add('success');
+  } else {
+    submitBtn.disabled = true;
+    formStatus.classList.remove('success');
+    let msgs = [];
+    if(!proofValid) msgs.push('valid proof required');
+    if(!otpVerified) msgs.push('mobile verification required');
+    formStatus.textContent = msgs.join(' and ');
+  }
+}
+
+// Form submit handler (demo)
+document.getElementById('emergencyForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  // CLIENT-SIDE: gather form data
+  const formData = new FormData();
+  formData.append('reqName', document.getElementById('reqName').value);
+  formData.append('reqMobile', document.getElementById('reqMobile').value);
+  formData.append('reqEmail', document.getElementById('reqEmail').value);
+  formData.append('patientName', document.getElementById('patientName').value);
+  formData.append('bloodGroup', document.getElementById('bloodGroup').value);
+  formData.append('units', document.getElementById('units').value);
+  formData.append('address', document.getElementById('address').value);
+  formData.append('hospital', document.getElementById('hospital').value);
+  formData.append('reason', document.getElementById('reason').value);
+  formData.append('deliveryMode', document.getElementById('deliveryMode').value);
+  formData.append('fee', document.getElementById('fee').textContent);
+  // proof file
+  if(proofFile.files[0]) formData.append('proof', proofFile.files[0]);
+
+  // payment method
+  const pm = document.querySelector('.pm.active').dataset.method;
+  formData.append('paymentMethod', pm);
+  if(pm === 'upi') formData.append('upiId', document.getElementById('upiId').value);
+  if(pm === 'netbank') formData.append('netRef', document.getElementById('netRef').value);
+
+  // demo: show summary and say that we would call backend next
+  const summary = {
+    requester: formData.get('reqName'),
+    mobile: formData.get('reqMobile'),
+    patient: formData.get('patientName'),
+    bloodGroup: formData.get('bloodGroup'),
+    units: formData.get('units'),
+    address: formData.get('address'),
+    paymentMethod: formData.get('paymentMethod'),
+    fee: formData.get('fee'),
+  };
+  alert('Demo: Emergency request prepared. In production this data would be sent to your server for verification and payment.\n\nSummary (demo):\n' + JSON.stringify(summary, null, 2));
+
+  // PRODUCTION: Send formData to server endpoint, e.g.:
+  // fetch('/api/emergency-request', { method: 'POST', body: formData })
+  //   .then(res => res.json()).then(...)
+
+});
+
+// Initial state
+updateSubmitState();
+</script>
+</body>
+</html>

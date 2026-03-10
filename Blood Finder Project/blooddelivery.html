@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blood Finder</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* ===== Body & Font ===== */
+body {
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(120deg, #ffeaea, #fff8f8);
+  margin: 0; padding: 0;
+}
+
+/* ===== Header ===== */
+header {
+  background: linear-gradient(90deg,#ff4d4d,#d9534f);
+  color:white; padding:18px 25px; font-size:24px;
+  font-weight:bold; letter-spacing:1px;
+  display:flex; align-items:center; justify-content:space-between;
+  box-shadow:0 5px 15px rgba(0,0,0,0.2);
+  border-bottom-left-radius:20px;
+  border-bottom-right-radius:20px;
+}
+.menu-icon {
+  font-size:26px; cursor:pointer; transition:0.3s;
+}
+.menu-icon:hover { transform: scale(1.2); }
+
+/* ===== Drawer ===== */
+.drawer {
+  height:100%; width:0; position:fixed; top:0; left:0;
+  background-color:#fff; box-shadow:2px 0 5px rgba(0,0,0,0.3);
+  overflow-x:hidden; transition:0.3s; padding-top:60px; z-index:999;
+}
+.drawer a {
+  padding:18px 25px; text-decoration:none; font-size:18px;
+  color:#333; display:block; transition:0.2s;
+  border-radius:8px; margin:5px 15px;
+}
+.drawer a:hover { background:#ffeaea; }
+.drawer .closebtn { position:absolute; top:15px; right:20px; font-size:28px; cursor:pointer; color:#d9534f; }
+
+/* ===== Container / Cards ===== */
+.container {
+  width:90%; max-width:700px; margin:30px auto; 
+  background: linear-gradient(135deg,#ffffff,#ffeaea);
+  padding:30px; border-radius:20px; 
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+  animation: fadeIn 0.6s ease-in-out;
+}
+@keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
+
+h2 { color:#d9534f; text-align:center; margin-bottom:20px; }
+label { font-weight:500; display:block; margin-top:12px; color:#333; }
+
+/* ===== Inputs & Select ===== */
+select, input {
+  width:100%; padding:14px; margin-top:6px; border:1px solid #ccc; 
+  border-radius:12px; font-size:15px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  transition:0.3s;
+}
+select:focus, input:focus {
+  border-color:#d9534f;
+  box-shadow:0 0 8px rgba(217,83,79,0.3);
+  outline:none;
+}
+
+/* ===== Buttons ===== */
+button {
+  margin-top:18px; width:100%; padding:14px; 
+  background:#d9534f; border:none; color:white; font-size:16px;
+  border-radius:12px; cursor:pointer; 
+  box-shadow:0 4px 10px rgba(0,0,0,0.2);
+  transition:0.3s;
+}
+button:hover {
+  background:#c9302c; transform:scale(1.05);
+  box-shadow:0 6px 15px rgba(0,0,0,0.25);
+}
+
+/* ===== Hospital Cards ===== */
+.hospital {
+  background: linear-gradient(135deg,#fff3f3,#ffeaea);
+  border:1px solid #f5c6cb; padding:20px; margin-bottom:20px; 
+  border-radius:15px; transition:0.3s;
+}
+.hospital:hover { box-shadow:0 8px 20px rgba(0,0,0,0.15); transform: translateY(-5px);}
+.hospital h3 { margin:0 0 8px 0; color:#b52b27; }
+.hospital p { margin:6px 0; font-size:15px; }
+.hospital a { text-decoration:none; font-weight:bold; }
+.hospital a.map-link { color:#0275d8; }
+.hospital a.phone-link { color:#28a745; }
+
+/* ===== Actions ===== */
+.actions { margin-top:12px; }
+.actions button { width:auto; margin-right:10px; padding:8px 15px; font-size:14px; }
+.actions a { display:inline-block; margin-top:8px; padding:8px 15px; background:#0275d8; color:white; border-radius:8px; text-decoration:none; font-size:14px; transition:0.3s; }
+.actions a:hover { background:#025aa5; }
+
+/* ===== History Table ===== */
+.history-table { width:100%; margin-top:15px; border-collapse: collapse; }
+.history-table th, .history-table td { border:1px solid #ccc; padding:10px; text-align:center; font-size:14px; }
+.history-table th { background:#f5c6cb; color:#b52b27; }
+
+/* ===== Notification ===== */
+#notification {
+  position: fixed; top: 20px; right: 20px;
+  background: #28a745; color: white;
+  padding: 15px 20px; border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  display: none; z-index: 9999; font-weight: 500;
+}
+
+/* ===== Responsive ===== */
+@media(max-width:600px){
+  .container { padding:20px; }
+  header { font-size:20px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="menu-icon" onclick="openDrawer()">☰</span>
+  🩸 Blood Finder
+</header>
+
+<!-- Drawer -->
+<div id="myDrawer" class="drawer">
+  <span class="closebtn" onclick="closeDrawer()">×</span>
+  <a href="#" onclick="showSection('searchSection')">🏠 Home / Search Blood</a>
+  <a href="#" onclick="showSection('loginSection')">Hospital Login</a>
+  <a href="#" onclick="showSection('registerSection')">New Hospital Registration</a>
+</div>
+
+<!-- Notification -->
+<div id="notification"></div>
+
+<!-- Search Section -->
+<div class="container" id="searchSection">
+  <h2>Search Blood Availability</h2>
+  <label for="bloodGroup">Select Blood Group:</label>
+  <select id="bloodGroup">
+    <option value="O+">O+</option><option value="O-">O-</option>
+    <option value="A+">A+</option><option value="A-">A-</option>
+    <option value="B+">B+</option><option value="B-">B-</option>
+    <option value="AB+">AB+</option><option value="AB-">AB-</option>
+  </select>
+  <label for="city">Enter City:</label>
+  <input type="text" id="city" placeholder="e.g. Gorakhpur">
+  <button onclick="searchBlood()">🔍 Search Availability</button>
+  <div class="results" id="results"></div>
+</div>
+
+<!-- Hospital Login -->
+<div class="container" id="loginSection" style="display:none;">
+  <h2>Hospital Login</h2>
+  <label>Username:</label><input type="text" id="username">
+  <label>Password:</label><input type="password" id="password">
+  <button onclick="hospitalLogin()">Login</button>
+</div>
+
+<!-- Hospital Dashboard -->
+<div class="container" id="dashboardSection" style="display:none;">
+  <h2>Update Blood Availability</h2>
+  <label for="bloodGroupUpdate">Blood Group:</label>
+  <select id="bloodGroupUpdate">
+    <option value="O+">O+</option><option value="O-">O-</option>
+    <option value="A+">A+</option><option value="A-">A-</option>
+    <option value="B+">B+</option><option value="B-">B-</option>
+    <option value="AB+">AB+</option><option value="AB-">AB-</option>
+  </select>
+  <label for="units">Units Available:</label>
+  <select id="units">
+    <option value="">Select Units</option>
+    <option value="0">No Stock / Not Available</option>
+    <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+    <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+    <option value="7">7</option><option value="8">8</option>
+    <option value="9">9</option><option value="10">10</option>
+  </select>
+  <button onclick="updateAvailability()">Update</button>
+
+  <h3>Blood Stock History</h3>
+  <table class="history-table" id="historyTable">
+    <tr><th>Blood Group</th><th>Units</th><th>Last Updated</th></tr>
+  </table>
+
+  <h3>Blood Stock Chart</h3>
+  <canvas id="bloodChart" style="width:100%; max-width:700px;"></canvas>
+</div>
+
+<!-- New Hospital Registration -->
+<div class="container" id="registerSection" style="display:none;">
+  <h2>Register New Hospital</h2>
+  <label>Hospital Name:</label><input type="text" id="newHospitalName">
+  <label>Address:</label><input type="text" id="newHospitalAddress">
+  <label>Phone:</label><input type="text" id="newHospitalPhone">
+  <label>Username:</label><input type="text" id="newHospitalUsername">
+  <label>Password:</label><input type="password" id="newHospitalPassword">
+  <button onclick="registerHospital()">Register</button>
+</div>
+
+<script>
+let hospitals=[
+{name:"BRD Medical College", units:{"O+":12,"O-":12,"A+":12,"A-":12,"B+":12,"B-":12,"AB+":12,"AB-":12}, address:"XYZ Road", phone:"9876543210", username:"brd", password:"brd123", history:{}},
+{name:"Apollo Hospital", units:{"O+":5,"O-":5,"A+":5,"A-":5,"B+":5,"B-":5,"AB+":5,"AB-":5}, address:"ABC Nagar", phone:"9934789210", username:"apollo", password:"apollo123", history:{}},
+{name:"City Care Hospital", units:{"O+":8,"O-":8,"A+":8,"A-":8,"B+":8,"B-":8,"AB+":8,"AB-":8}, address:"Civil Lines", phone:"9123456780", username:"citycare", password:"city123", history:{}},
+{name:"Maa Vindhyavasini Hospital", units:{"O+":6,"O-":6,"A+":6,"A-":6,"B+":6,"B-":6,"AB+":6,"AB-":6}, address:"Golghar", phone:"9988776655", username:"vindhya", password:"vindhya123", history:{}},
+{name:"Shri Ram Hospital", units:{"O+":10,"O-":10,"A+":10,"A-":10,"B+":10,"B-":10,"AB+":10,"AB-":10}, address:"Basharatpur", phone:"9876501234", username:"shriram", password:"ram123", history:{}},
+{name:"Rathore Hospital", units:{"O+":7,"O-":7,"A+":7,"A-":7,"B+":7,"B-":7,"AB+":7,"AB-":7}, address:"Khalilabad Road", phone:"9123098765", username:"rathore", password:"rath123", history:{}}
+];
+
+let loggedInHospital=null;
+let bloodChart;
+
+function openDrawer(){document.getElementById("myDrawer").style.width="250px";}
+function closeDrawer(){document.getElementById("myDrawer").style.width="0";}
+function showSection(id){
+  document.getElementById("searchSection").style.display="none";
+  document.getElementById("loginSection").style.display="none";
+  document.getElementById("dashboardSection").style.display="none";
+  document.getElementById("registerSection").style.display="none";
+  document.getElementById(id).style.display="block";
+  closeDrawer();
+  if(id=="dashboardSection" && loggedInHospital){ showHistory(); }
+}
+
+function searchBlood(){
+  let blood=document.getElementById("bloodGroup").value;
+  let city=document.getElementById("city").value.trim();
+  if(city===""){ alert("Please enter a city!"); return; }
+  let resultsDiv=document.getElementById("results");
+  resultsDiv.innerHTML=`<h3>Results for "${blood}" in ${city}</h3>`;
+  hospitals.forEach(h=>{
+    let availableUnits=h.units[blood];
+    let displayUnits=availableUnits>0?availableUnits:"No Stock";
+    let mapQuery=encodeURIComponent(h.name+" "+h.address+" "+city);
+    resultsDiv.innerHTML+=`<div class="hospital">
+      <h3>${h.name}</h3>
+      <p>Available: <b>${displayUnits}</b> of ${blood}</p>
+      <p>📍 Address: <a href="https://www.google.com/maps/search/${mapQuery}" target="_blank" class="map-link">${h.address}, ${city}</a></p>
+      <p>📞 Contact: <a href="tel:${h.phone}" class="phone-link">${h.phone}</a></p>
+      <div class="actions">
+        <button onclick="requestBlood('${h.name}','${blood}')">Request Blood</button>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${mapQuery}" target="_blank">🚗 Get Directions</a>
+      </div></div>`;
+  });
+}
+
+function requestBlood(hospital, blood){
+  alert("Blood request for "+blood+" sent to "+hospital);
+  let notification = document.getElementById("notification");
+  notification.innerText = `Blood request received for ${blood} at ${hospital}`;
+  notification.style.display = "block";
+  setTimeout(()=>{ notification.style.display = "none"; }, 3500);
+}
+
+function hospitalLogin(){
+  let user=document.getElementById("username").value;
+  let pass=document.getElementById("password").value;
+  let hospital=hospitals.find(h=>h.username===user && h.password===pass);
+  if(hospital){ loggedInHospital=hospital; alert("Login successful!"); showSection("dashboardSection"); }
+  else { alert("Invalid username or password"); }
+}
+
+function updateAvailability(){
+  if(!loggedInHospital){ alert("Please login!"); return; }
+  let group=document.getElementById("bloodGroupUpdate").value;
+  let units=document.getElementById("units").value;
+  if(units===""){ alert("Please select units!"); return; }
+  let updatedUnits=parseInt(units);
+  loggedInHospital.units[group]=updatedUnits;
+  loggedInHospital.history[group]={units:updatedUnits,time:new Date().toLocaleString()};
+  alert(updatedUnits===0?"Blood group "+group+" marked as NO STOCK / NOT AVAILABLE ✅":"Updated "+units+" units of "+group+" ✅");
+  showHistory();
+}
+
+function showHistory(){
+  let table=document.getElementById("historyTable");
+  table.innerHTML=`<tr><th>Blood Group</th><th>Units</th><th>Last Updated</th></tr>`;
+  for(let group in loggedInHospital.units){
+    let entry=loggedInHospital.history[group];
+    let time=entry?entry.time:"Not Updated";
+    let displayUnits=loggedInHospital.units[group]===0?"No Stock":loggedInHospital.units[group];
+    table.innerHTML+=`<tr><td>${group}</td><td>${displayUnits}</td><td>${time}</td></tr>`;
+  }
+  showChart();
+}
+
+function showChart(){
+  if(!loggedInHospital) return;
+  const ctx = document.getElementById('bloodChart').getContext('2d');
+  const data = {
+    labels: Object.keys(loggedInHospital.units),
+    datasets: [{
+      label: 'Units Available',
+      data: Object.values(loggedInHospital.units),
+      backgroundColor: Object.values(loggedInHospital.units).map(v=>v<3?'#ff4d4d':v<7?'#ffc107':'#28a745'),
+      borderRadius: 8,
+      barPercentage: 0.6
+    }]
+  };
+  const config = { type: 'bar', data: data, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 15 } } } };
+  if(bloodChart) bloodChart.destroy();
+  bloodChart = new Chart(ctx, config);
+}
+
+function registerHospital(){
+  let name=document.getElementById("newHospitalName").value;
+  let addr=document.getElementById("newHospitalAddress").value;
+  let phone=document.getElementById("newHospitalPhone").value;
+  let username=document.getElementById("newHospitalUsername").value;
+  let password=document.getElementById("newHospitalPassword").value;
+  if(name && addr && phone && username && password){
+    hospitals.push({name:name, units:{"O+":0,"O-":0,"A+":0,"A-":0,"B+":0,"B-":0,"AB+":0,"AB-":0}, address:addr, phone:phone, username:username, password:password, history:{}});
+    alert("Hospital "+name+" registered successfully!"); showSection('searchSection'); 
+  } else { alert("Please fill all details!"); }
+}
+</script>
+</body>
+</html>

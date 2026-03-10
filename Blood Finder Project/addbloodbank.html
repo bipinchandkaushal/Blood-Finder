@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Blood Center - Blood Finder</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+body { font-family: Arial, sans-serif; background:#f8f9fa; margin:0; padding:20px; }
+h2 { color:#d9534f; margin-bottom:20px; }
+form { background:#fff; padding:20px; border:1px solid #d9534f; border-radius:8px; max-width:1000px; margin:auto; box-shadow:0 3px 10px rgba(0,0,0,0.1); }
+.form-row { display:flex; flex-wrap:wrap; gap:15px; margin-bottom:15px; }
+.form-row label { flex:1 0 150px; font-weight:bold; margin-top:6px; }
+.form-row input, .form-row select, .form-row textarea { flex:2 0 200px; padding:10px; border:1px solid #ccc; border-radius:5px; font-size:14px; }
+textarea { resize:none; }
+button { padding:12px 20px; margin-top:15px; background:#d9534f; color:white; border:none; border-radius:6px; cursor:pointer; font-size:16px; }
+button:hover { background:#c9302c; }
+.map-container { width:100%; height:300px; margin-top:10px; }
+@media(max-width:800px){ .form-row { flex-direction:column; } label, input, select, textarea { flex:1 0 100%; } }
+</style>
+</head>
+<body>
+
+<h2>🩸 Add Blood Center</h2>
+
+<form id="bloodCenterForm">
+  <!-- Basic Info -->
+  <div class="form-row">
+    <label for="centerName">Name*</label>
+    <input type="text" id="centerName" required>
+    <label for="category">Category*</label>
+    <select id="category" required>
+      <option value="">Select type</option>
+      <option value="Government">Government</option>
+      <option value="Private">Private</option>
+    </select>
+    <label for="contactPerson">Contact Person*</label>
+    <input type="text" id="contactPerson" required>
+  </div>
+
+  <div class="form-row">
+    <label for="email">Email</label>
+    <input type="email" id="email">
+    <label for="contactNo">Contact No.*</label>
+    <input type="text" id="contactNo" required>
+    <label for="firstRegDate">First Registration Date*</label>
+    <input type="date" id="firstRegDate" required>
+  </div>
+
+  <div class="form-row">
+    <label for="licenseNo">License No.</label>
+    <input type="text" id="licenseNo">
+    <label for="componentFacility">Component Facility</label>
+    <select id="componentFacility">
+      <option value="">Select Value</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+    <label for="apheresisFacility">Apheresis Facility</label>
+    <select id="apheresisFacility">
+      <option value="">Select Value</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+    <label for="helplineNo">Helpline No.</label>
+    <input type="text" id="helplineNo">
+  </div>
+
+  <!-- Postal Address -->
+  <div class="form-row">
+    <label for="address1">Address1*</label>
+    <input type="text" id="address1" required>
+    <label for="address2">Address2</label>
+    <input type="text" id="address2">
+    <label for="pincode">Pincode*</label>
+    <input type="text" id="pincode" required>
+  </div>
+
+  <!-- Map -->
+  <div class="form-row">
+    <div style="flex:1 0 50%;">
+      <label for="latitude">Latitude</label>
+      <input type="text" id="latitude" readonly>
+      <label for="longitude">Longitude</label>
+      <input type="text" id="longitude" readonly>
+      <button type="button" onclick="geocodeAddress()">Geocode</button>
+    </div>
+    <div class="map-container" id="map"></div>
+  </div>
+
+  <!-- Website and Beds -->
+  <div class="form-row">
+    <label for="website">Website</label>
+    <input type="text" id="website">
+    <label for="beds">No of Bed Hospital</label>
+    <input type="number" id="beds">
+  </div>
+
+  <button type="submit">Submit</button>
+</form>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+// Initialize Leaflet map
+let map = L.map('map').setView([28.6139, 77.2090], 12); // Default: New Delhi
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+let marker = L.marker([28.6139, 77.2090], {draggable:true}).addTo(map);
+
+// Update lat/lng when marker is moved
+marker.on('dragend', function(e){
+  let latlng = marker.getLatLng();
+  document.getElementById("latitude").value = latlng.lat.toFixed(6);
+  document.getElementById("longitude").value = latlng.lng.toFixed(6);
+});
+
+// Update marker when you click on map
+map.on('click', function(e){
+  marker.setLatLng(e.latlng);
+  document.getElementById("latitude").value = e.latlng.lat.toFixed(6);
+  document.getElementById("longitude").value = e.latlng.lng.toFixed(6);
+});
+
+// Optional geocode: just alert for now
+function geocodeAddress() {
+  alert("Use the map to set the location by clicking or dragging the marker.");
+}
+
+// Form submission
+document.getElementById("bloodCenterForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  alert("Blood Center submitted successfully!\nLat: " + document.getElementById("latitude").value + ", Lng: " + document.getElementById("longitude").value);
+});
+</script>
+
+</body>
+</html>

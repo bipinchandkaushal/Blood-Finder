@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Donate Blood — OTP Demo</title>
+<style>
+  :root{--red:#d9534f;--red-dark:#c9302c;--card:#fff}
+  *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+  body{background:#f4f6f8;margin:0;display:flex;align-items:center;justify-content:center;height:100vh}
+  .container{width:100%;max-width:520px;background:var(--card);border-radius:10px;padding:24px;box-shadow:0 6px 24px rgba(10,10,10,.08)}
+  h2{color:var(--red);margin:0 0 14px}
+  label{display:block;margin:10px 0 6px;font-weight:600}
+  input, select, textarea{width:100%;padding:10px;border:1px solid #d7dbe0;border-radius:6px;font-size:15px}
+  textarea{min-height:80px;resize:vertical}
+  .row{display:flex;gap:10px}
+  .col{flex:1}
+  button{background:var(--red);color:#fff;border:none;padding:12px 14px;border-radius:8px;font-weight:700;cursor:pointer;margin-top:14px}
+  button.secondary{background:#6c757d}
+  .muted{color:#666;font-size:13px;margin-top:8px}
+  .success{color:green;margin-top:12px;font-weight:700}
+  /* OTP modal */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center}
+  .modal{background:#fff;border-radius:10px;padding:20px;width:320px;box-shadow:0 8px 30px rgba(0,0,0,.2)}
+  .otp-inputs{display:flex;gap:8px;justify-content:center;margin:12px 0}
+  .otp-inputs input{width:44px;height:44px;text-align:center;font-size:18px;border:1px solid #ccc;border-radius:6px}
+  .small{font-size:13px;color:#555}
+  .error{color:#c00;margin-top:8px}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Donate Blood — Register</h2>
+  <form id="donorForm">
+    <label for="fullName">Full name</label>
+    <input id="fullName" name="fullName" required />
+
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" />
+
+    <div class="row">
+      <div class="col">
+        <label for="mobile">Mobile</label>
+        <input id="mobile" name="mobile" placeholder="10 digit" pattern="[0-9]{10}" required />
+      </div>
+      <div style="width:140px">
+        <label for="bloodGroup">Blood group</label>
+        <select id="bloodGroup" name="bloodGroup" required>
+          <option value="">Select</option>
+          <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+          <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+        </select>
+      </div>
+    </div>
+
+    <label for="location">City / Location</label>
+    <input id="location" name="location" />
+
+    <label for="message">Message (optional)</label>
+    <textarea id="message" name="message"></textarea>
+
+    <button id="sendOtpBtn" type="button">Send OTP</button>
+    <div class="muted">You will receive a 4-digit OTP (demo). This page simulates verification.</div>
+    <div id="status" class="success" style="display:none"></div>
+  </form>
+</div>
+
+<!-- OTP overlay -->
+<div id="overlay" class="overlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <strong>Verify mobile</strong>
+      <button id="closeModal" style="background:none;border:none;font-weight:700;cursor:pointer">X</button>
+    </div>
+    <div class="small" id="mobileText" style="margin-top:8px">OTP sent to </div>
+
+    <div class="otp-inputs" id="otpInputs">
+      <input inputmode="numeric" maxlength="1" />
+      <input inputmode="numeric" maxlength="1" />
+      <input inputmode="numeric" maxlength="1" />
+      <input inputmode="numeric" maxlength="1" />
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button id="verifyBtn" style="flex:1">Verify OTP</button>
+      <button id="resendBtn" class="secondary">Resend</button>
+    </div>
+
+    <div id="otpError" class="error" style="display:none"></div>
+    <div id="demoShownOtp" class="small" style="margin-top:8px;color:#333"></div>
+    <div id="triesLeft" class="small" style="margin-top:6px;color:#555"></div>
+  </div>
+</div>
+
+<script>
+  // Simulated OTP demo
+  const sendOtpBtn = document.getElementById('sendOtpBtn');
+  const overlay = document.getElementById('overlay');
+  const mobileText = document.getElementById('mobileText');
+  const otpInputs = Array.from(document.querySelectorAll('#otpInputs input'));
+  const verifyBtn = document.getElementById('verifyBtn');
+  const resendBtn = document.getElementById('resendBtn');
+  const closeModal = document.getElementById('closeModal');
+  const otpError = document.getElementById('otpError');
+  const demoShownOtp = document.getElementById('demoShownOtp');
+  const triesLeft = document.getElementById('triesLeft');
+  const status = document.getElementById('status');
+
+  let currentOtp = null;
+  let mobileBeingVerified = null;
+  let attempts = 0;
+
+  function generateOtp(){
+    return Math.floor(1000 + Math.random()*9000).toString();
+  }
+
+  function openOtpModal(mobile){
+    mobileBeingVerified = mobile;
+    mobileText.textContent = "OTP sent to " + mobile;
+    attempts = 0;
+    triesLeft.textContent = "Attempts left: 3";
+    otpError.style.display = 'none';
+    demoShownOtp.style.display = 'block';
+    overlay.style.display = 'flex';
+    otpInputs.forEach(i=>{ i.value=''; i.disabled=false; });
+    otpInputs[0].focus();
+  }
+
+  function closeOtpModal(){
+    overlay.style.display = 'none';
+  }
+
+  sendOtpBtn.addEventListener('click', () => {
+    const mobile = document.getElementById('mobile').value.trim();
+    if(!/^[0-9]{10}$/.test(mobile)){
+      alert('Enter a valid 10-digit mobile number.');
+      return;
+    }
+    currentOtp = generateOtp();
+    demoShownOtp.textContent = "Demo OTP (only on this page): " + currentOtp;
+    openOtpModal(mobile);
+  });
+
+  // auto move focus
+  otpInputs.forEach((inp, idx) => {
+    inp.addEventListener('input', (e) => {
+      if(e.inputType === 'insertText' || e.data){
+        if(idx < otpInputs.length-1) otpInputs[idx+1].focus();
+      }
+      if(inp.value.length > 1) inp.value = inp.value.slice(0,1);
+    });
+    inp.addEventListener('keydown', (e) => {
+      if(e.key === 'Backspace' && !inp.value && idx>0) otpInputs[idx-1].focus();
+    });
+  });
+
+  verifyBtn.addEventListener('click', () => {
+    const userOtp = otpInputs.map(i=>i.value).join('');
+    if(userOtp.length !== 4){
+      otpError.style.display = 'block'; otpError.textContent = 'Enter 4-digit OTP';
+      return;
+    }
+    attempts++;
+    if(attempts > 3){
+      otpError.style.display = 'block'; otpError.textContent = 'Too many attempts. Please resend.';
+      triesLeft.textContent = 'Attempts left: 0';
+      otpInputs.forEach(i=>i.disabled=true);
+      return;
+    }
+    if(userOtp === currentOtp){
+      closeOtpModal();
+      status.style.display = 'block';
+      status.textContent = 'Phone verified. Thank you — form ready to submit.';
+      // Mark verified (you can add a flag to form if you later send to server)
+      document.getElementById('mobile').dataset.verified = 'true';
+    } else {
+      otpError.style.display = 'block'; otpError.textContent = 'Wrong OTP, try again.';
+      triesLeft.textContent = 'Attempts left: ' + (3 - attempts);
+    }
+  });
+
+  resendBtn.addEventListener('click', () => {
+    currentOtp = generateOtp();
+    demoShownOtp.textContent = "Demo OTP (only on this page): " + currentOtp;
+    otpInputs.forEach(i=>{ i.value=''; i.disabled=false; });
+    otpInputs[0].focus();
+    attempts = 0; triesLeft.textContent = 'Attempts left: 3';
+    otpError.style.display = 'none';
+  });
+
+  closeModal.addEventListener('click', closeOtpModal);
+
+  // Example: final form submission (client side)
+  document.getElementById('donorForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const verified = document.getElementById('mobile').dataset.verified === 'true';
+    if(!verified){
+      alert('Please verify your mobile number with OTP before submitting.');
+      return;
+    }
+    // gather data
+    const data = {
+      fullName: document.getElementById('fullName').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      mobile: document.getElementById('mobile').value.trim(),
+      bloodGroup: document.getElementById('bloodGroup').value,
+      location: document.getElementById('location').value.trim(),
+      message: document.getElementById('message').value.trim(),
+    };
+    console.log('Submit (demo):', data);
+    alert('Form submitted (demo). Check console for data.');
+    // reset
+    e.target.reset();
+    document.getElementById('mobile').dataset.verified = 'false';
+    status.style.display = 'none';
+  });
+</script>
+</body>
+</html>

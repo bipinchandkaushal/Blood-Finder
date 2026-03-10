@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blood Availability Map</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+  }
+  #map {
+    height: 100%;
+    width: 100%;
+  }
+  .info-window {
+    font-size: 14px;
+  }
+  .info-window h3 {
+    margin: 0;
+    color: #d9534f;
+  }
+  .info-window p {
+    margin: 4px 0 0;
+  }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+  // Sample blood bank/donor data
+  const bloodLocations = [
+    {
+      name: "Red Cross Blood Bank",
+      bloodGroup: "A+, O+, B+",
+      city: "Mumbai",
+      lat: 19.0760,
+      lng: 72.8777
+    },
+    {
+      name: "City Hospital Blood Center",
+      bloodGroup: "A-, AB+, O-",
+      city: "Pune",
+      lat: 18.5204,
+      lng: 73.8567
+    },
+    {
+      name: "Sunshine Blood Donors",
+      bloodGroup: "B+, O+",
+      city: "Delhi",
+      lat: 28.6139,
+      lng: 77.2090
+    }
+  ];
+
+  function initMap() {
+    // Center map to India
+    const map = new google.maps.Map(document.getElementById("map"), {
+      zoom: 5,
+      center: { lat: 20.5937, lng: 78.9629 }
+    });
+
+    // Add markers
+    bloodLocations.forEach(location => {
+      const marker = new google.maps.Marker({
+        position: { lat: location.lat, lng: location.lng },
+        map: map,
+        title: location.name
+      });
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: `
+          <div class="info-window">
+            <h3>${location.name}</h3>
+            <p><strong>Blood Groups:</strong> ${location.bloodGroup}</p>
+            <p><strong>City:</strong> ${location.city}</p>
+          </div>
+        `
+      });
+
+      marker.addListener("click", () => {
+        infoWindow.open(map, marker);
+      });
+    });
+  }
+</script>
+
+<!-- Google Maps API Key (replace YOUR_API_KEY with your key) -->
+<script async
+  src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
+</script>
+
+</body>
+</html>

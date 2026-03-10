@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donation History - Blood Finder</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #d9534f;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #d9534f;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+
+    .controls input, .controls select {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .controls input[type="date"] {
+      width: auto;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+      cursor: default;
+    }
+
+    table thead {
+      background-color: #d9534f;
+      color: white;
+    }
+
+    table th, table td {
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+      white-space: nowrap;
+    }
+
+    table th {
+      cursor: pointer;
+    }
+
+    table th:hover {
+      background: #c9302c;
+    }
+
+    table tbody tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    .status-success { color: green; font-weight: bold; }
+    .status-pending { color: orange; font-weight: bold; }
+    .status-cancelled { color: red; font-weight: bold; }
+
+    @media (max-width: 768px) {
+      header { font-size: 18px; }
+      .container { padding: 15px; }
+      h2 { font-size: 20px; }
+      table th, table td { padding: 8px; font-size: 14px; }
+      .controls { flex-direction: column; }
+      .controls input, .controls select { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>Blood Finder - Donation History</header>
+
+  <div class="container">
+    <h2>Your Past Donations</h2>
+
+    <!-- Controls -->
+    <div class="controls">
+      <input type="text" id="searchInput" placeholder="Search by hospital, blood group, or location...">
+      <select id="statusFilter">
+        <option value="">Filter by Status</option>
+        <option value="Completed">Completed</option>
+        <option value="Pending">Pending</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+      <input type="date" id="fromDate">
+      <input type="date" id="toDate">
+    </div>
+
+    <div class="table-wrapper">
+      <table id="donationTable">
+        <thead>
+          <tr>
+            <th data-column="date">Date ⬍</th>
+            <th data-column="group">Blood Group ⬍</th>
+            <th data-column="location">Location ⬍</th>
+            <th data-column="units">Units Donated ⬍</th>
+            <th data-column="status">Status ⬍</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Data will be inserted by JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Example data (replace with backend API data)
+    const donationHistory = [
+      { date: "2025-09-20", group: "O+", location: "AIIMS Hospital, Delhi", units: 10, status: "Completed" },
+      { date: "2025-07-15", group: "B+", location: "Apollo Hospital, Noida", units: 12, status: "Completed" },
+      { date: "2025-05-02", group: "A-", location: "Fortis Hospital, Gurgaon", units: 21, status: "Pending" },
+      { date: "2025-03-10", group: "AB+", location: "Max Hospital, Delhi", units: 18, status: "Cancelled" },
+      { date: "2024-12-25", group: "O-", location: "Safdarjung Hospital, Delhi", units: 25, status: "Completed" }
+    ];
+
+    const tableBody = document.querySelector("#donationTable tbody");
+    const searchInput = document.getElementById("searchInput");
+    const statusFilter = document.getElementById("statusFilter");
+    const fromDate = document.getElementById("fromDate");
+    const toDate = document.getElementById("toDate");
+
+    let currentSort = { column: "date", order: "desc" };
+
+    function renderTable(data) {
+      tableBody.innerHTML = "";
+      if (data.length === 0) {
+        tableBody.innerHTML = "<tr><td colspan='5'>No records found</td></tr>";
+        return;
+      }
+      data.forEach(donation => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${donation.date}</td>
+          <td>${donation.group}</td>
+          <td>${donation.location}</td>
+          <td>${donation.units}</td>
+          <td class="${
+            donation.status === "Completed" ? "status-success" :
+            donation.status === "Pending" ? "status-pending" :
+            "status-cancelled"
+          }">${donation.status}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    function filterTable() {
+      const searchText = searchInput.value.toLowerCase();
+      const statusValue = statusFilter.value;
+      const from = fromDate.value ? new Date(fromDate.value) : null;
+      const to = toDate.value ? new Date(toDate.value) : null;
+
+      let filteredData = donationHistory.filter(donation => {
+        const matchesSearch = donation.group.toLowerCase().includes(searchText) ||
+                              donation.location.toLowerCase().includes(searchText);
+        const matchesStatus = statusValue ? donation.status === statusValue : true;
+
+        const donationDate = new Date(donation.date);
+        const matchesFrom = from ? donationDate >= from : true;
+        const matchesTo = to ? donationDate <= to : true;
+
+        return matchesSearch && matchesStatus && matchesFrom && matchesTo;
+      });
+
+      sortData(filteredData);
+      renderTable(filteredData);
+    }
+
+    function sortData(data) {
+      const { column, order } = currentSort;
+      data.sort((a, b) => {
+        let valA = a[column], valB = b[column];
+
+        if (column === "date") {
+          valA = new Date(valA);
+          valB = new Date(valB);
+        }
+
+        if (valA < valB) return order === "asc" ? -1 : 1;
+        if (valA > valB) return order === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    // Event listeners
+    searchInput.addEventListener("input", filterTable);
+    statusFilter.addEventListener("change", filterTable);
+    fromDate.addEventListener("change", filterTable);
+    toDate.addEventListener("change", filterTable);
+
+    // Sorting on header click
+    document.querySelectorAll("#donationTable thead th").forEach(th => {
+      th.addEventListener("click", () => {
+        const column = th.dataset.column;
+        if (currentSort.column === column) {
+          currentSort.order = currentSort.order === "asc" ? "desc" : "asc";
+        } else {
+          currentSort.column = column;
+          currentSort.order = "asc";
+        }
+        filterTable();
+      });
+    });
+
+    // Initial render
+    filterTable();
+  </script>
+
+</body>
+</html>
